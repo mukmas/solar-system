@@ -1,24 +1,18 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import * as THREE from 'three'
+import "./style.css"
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+const scene = new THREE.Scene()
 
-setupCounter(document.querySelector('#counter'))
+const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height)
+scene.add(camera)
+
+const canvas = document.querySelector('.webgl')
+const renderer = new THREE.WebGLRenderer({canvas})
+renderer.setPixelRatio(2)
+renderer.setSize(sizes.width, sizes.height)
+renderer.render(scene, camera)
