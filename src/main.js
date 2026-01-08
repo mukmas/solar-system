@@ -1,6 +1,17 @@
 import * as THREE from 'three'
 import "./style.css"
 
+const keys = {
+    "W": false,
+    "A": false,
+    "S": false,
+    "D": false,
+    "Shift": false,
+    " ": false // space key
+}
+
+let speed = 0.1
+
 const scene = new THREE.Scene()
 
 const sizes = {
@@ -38,7 +49,31 @@ window.addEventListener("resize", () => {
     renderer.setSize(sizes.width, sizes.height)
 })
 
+window.addEventListener("keydown", (event) => {
+    let key = event.key
+    if (key.length === 1) key = key.toUpperCase()
+    keys[key] = true
+})
+window.addEventListener("keyup", (event) => {
+    let key = event.key
+    if (key.length === 1) key = key.toUpperCase()
+    keys[key] = false
+})
+
 const loop = () => {
+    if (keys["W"])
+        camera.position.z -= speed
+    if (keys["A"])
+        camera.position.x -= speed
+    if (keys["S"])
+        camera.position.z += speed
+    if (keys["D"])
+        camera.position.x += speed
+    if (keys["Shift"])
+        camera.position.y -= speed
+    if (keys[" "])
+        camera.position.y += speed
+
     renderer.render(scene, camera)
     window.requestAnimationFrame(loop)
 }
