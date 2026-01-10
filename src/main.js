@@ -10,7 +10,11 @@ const keys = {
     " ": false // space key
 }
 
-let speed = 0.1
+let speed = 10
+const sensitivity = 0.001
+const forward = new THREE.Vector3()
+const up = new THREE.Vector3(0, 1, 0)
+const right = new THREE.Vector3()
 
 const scene = new THREE.Scene()
 
@@ -19,11 +23,17 @@ const sizes = {
     height: window.innerHeight
 }
 
+const player = new THREE.Object3D()
+player.position.set(0, 0, 20)
+scene.add(player)
+
 const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height)
-scene.add(camera)
-camera.position.z = 20
+player.add(camera)
 
 const canvas = document.querySelector('.webgl')
+canvas.addEventListener("click", () => {
+    canvas.requestPointerLock()
+})
 const renderer = new THREE.WebGLRenderer({canvas})
 renderer.setPixelRatio(2)
 renderer.setSize(sizes.width, sizes.height)
@@ -49,6 +59,12 @@ window.addEventListener("resize", () => {
     renderer.setSize(sizes.width, sizes.height)
 })
 
+window.addEventListener("mousemove", (event) => {
+    player.rotation.y -= event.movementX * sensitivity
+    camera.rotation.x -= event.movementY * sensitivity
+    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x))
+})
+
 window.addEventListener("keydown", (event) => {
     let key = event.key
     if (key.length === 1) key = key.toUpperCase()
@@ -60,19 +76,27 @@ window.addEventListener("keyup", (event) => {
     keys[key] = false
 })
 
-const loop = () => {
+let previousTime = 0
+
+const loop = (currentTime) => {
+    let deltaTime = (currentTime - previousTime) / 1000
+    previousTime = currentTime
+
+    camera.getWorldDirection(forward)
+    right.crossVectors(forward, up).normalize()
+
     if (keys["W"])
-        camera.position.z -= speed
-    if (keys["A"])
-        camera.position.x -= speed
+        player.position.add(forward.clone().multiplyScalar(speed * deltaTime))
     if (keys["S"])
-        camera.position.z += speed
+        player.position.add(forward.clone().multiplyScalar(-speed * deltaTime))
     if (keys["D"])
-        camera.position.x += speed
+        player.position.add(right.clone().multiplyScalar(speed * deltaTime))
+    if (keys["A"])
+        player.position.add(right.clone().multiplyScalar(-speed * deltaTime))
     if (keys["Shift"])
-        camera.position.y -= speed
+        player.position.y -= speed * deltaTime
     if (keys[" "])
-        camera.position.y += speed
+        player.position.y += speed * deltaTime
 
     renderer.render(scene, camera)
     window.requestAnimationFrame(loop)
