@@ -7,11 +7,14 @@ const keys = {
     "S": false,
     "D": false,
     "Shift": false,
+    "Control": false,
     " ": false // space key
 }
 
-let speed = 10
-const sensitivity = 0.001
+let speed
+const walkingSpeed = 10
+const sprintSpeed = 50
+const sensitivity = 0.0005
 const forward = new THREE.Vector3()
 const up = new THREE.Vector3(0, 1, 0)
 const right = new THREE.Vector3()
@@ -62,7 +65,7 @@ window.addEventListener("resize", () => {
 window.addEventListener("mousemove", (event) => {
     player.rotation.y -= event.movementX * sensitivity
     camera.rotation.x -= event.movementY * sensitivity
-    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x))
+    camera.rotation.x = Math.max(-Math.PI/2 + 0.01, Math.min(Math.PI/2 - 0.01, camera.rotation.x))
 })
 
 window.addEventListener("keydown", (event) => {
@@ -85,6 +88,11 @@ const loop = (currentTime) => {
     camera.getWorldDirection(forward)
     right.crossVectors(forward, up).normalize()
 
+    if (keys["Shift"])
+        speed = sprintSpeed
+    else
+        speed = walkingSpeed
+
     if (keys["W"])
         player.position.add(forward.clone().multiplyScalar(speed * deltaTime))
     if (keys["S"])
@@ -93,7 +101,7 @@ const loop = (currentTime) => {
         player.position.add(right.clone().multiplyScalar(speed * deltaTime))
     if (keys["A"])
         player.position.add(right.clone().multiplyScalar(-speed * deltaTime))
-    if (keys["Shift"])
+    if (keys["Control"])
         player.position.y -= speed * deltaTime
     if (keys[" "])
         player.position.y += speed * deltaTime
