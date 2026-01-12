@@ -1,57 +1,20 @@
 import * as THREE from 'three'
 import "./style.css"
 
-const keys = {
-    "W": false,
-    "A": false,
-    "S": false,
-    "D": false,
-    "Shift": false,
-    "Control": false,
-    " ": false // space key
-}
-
-let speed
-const walkingSpeed = 10
-const sprintSpeed = 50
-const sensitivity = 0.0005
-const forward = new THREE.Vector3()
-const up = new THREE.Vector3(0, 1, 0)
-const right = new THREE.Vector3()
-
-const scene = new THREE.Scene()
+import { scene, camera } from './scene.js'
+import { addMouseLook, checkMouseMovement, setupInput, updateMovement } from './controls.js'
 
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
 
-const player = new THREE.Object3D()
-player.position.set(0, 0, 20)
-scene.add(player)
-
-const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height)
-player.add(camera)
-
 const canvas = document.querySelector('.webgl')
-canvas.addEventListener("click", () => {
-    canvas.requestPointerLock()
-})
+
 const renderer = new THREE.WebGLRenderer({canvas})
 renderer.setPixelRatio(2)
 renderer.setSize(sizes.width, sizes.height)
 renderer.render(scene, camera)
-
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.03)
-scene.add(ambientLight)
-
-const geometry = new THREE.SphereGeometry(3, 64, 64)
-const material = new THREE.MeshStandardMaterial({
-    color: "#00ff83",
-    roughness: 0.5
-})
-const mesh = new THREE.Mesh(geometry, material)
-scene.add(mesh)
 
 window.addEventListener("resize", () => {
     sizes.width = window.innerWidth
@@ -62,50 +25,16 @@ window.addEventListener("resize", () => {
     renderer.setSize(sizes.width, sizes.height)
 })
 
-window.addEventListener("mousemove", (event) => {
-    player.rotation.y -= event.movementX * sensitivity
-    camera.rotation.x -= event.movementY * sensitivity
-    camera.rotation.x = Math.max(-Math.PI/2 + 0.01, Math.min(Math.PI/2 - 0.01, camera.rotation.x))
-})
-
-window.addEventListener("keydown", (event) => {
-    let key = event.key
-    if (key.length === 1) key = key.toUpperCase()
-    keys[key] = true
-})
-window.addEventListener("keyup", (event) => {
-    let key = event.key
-    if (key.length === 1) key = key.toUpperCase()
-    keys[key] = false
-})
+addMouseLook(canvas)
+checkMouseMovement()
+setupInput()
 
 let previousTime = 0
-
 const loop = (currentTime) => {
     let deltaTime = (currentTime - previousTime) / 1000
     previousTime = currentTime
 
-    camera.getWorldDirection(forward)
-    right.crossVectors(forward, up).normalize()
-
-    if (keys["Shift"])
-        speed = sprintSpeed
-    else
-        speed = walkingSpeed
-
-    if (keys["W"])
-        player.position.add(forward.clone().multiplyScalar(speed * deltaTime))
-    if (keys["S"])
-        player.position.add(forward.clone().multiplyScalar(-speed * deltaTime))
-    if (keys["D"])
-        player.position.add(right.clone().multiplyScalar(speed * deltaTime))
-    if (keys["A"])
-        player.position.add(right.clone().multiplyScalar(-speed * deltaTime))
-    if (keys["Control"])
-        player.position.y -= speed * deltaTime
-    if (keys[" "])
-        player.position.y += speed * deltaTime
-
+    updateMovement(deltaTime)
     renderer.render(scene, camera)
     window.requestAnimationFrame(loop)
 }
