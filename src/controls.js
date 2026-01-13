@@ -11,8 +11,8 @@ const keys = {
     " ": false // space key
 }
 
-const walkingSpeed = 10
-const sprintSpeed = 50
+const walkingSpeed = 2700
+const sprintSpeed = walkingSpeed * 3
 const sensitivity = 0.0005
 const forward = new THREE.Vector3()
 const up = new THREE.Vector3(0, 1, 0)
